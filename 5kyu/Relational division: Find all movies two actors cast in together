@@ -1,0 +1,40 @@
+--Link: https://www.codewars.com/kata/5817b124e7f4576fd00020a2/train/sql
+
+--Given film_actor and film tables from the DVD Rental sample database 
+--find all movies both Sidney Crowe (actor_id = 105) and Salma Nolte (actor_id = 122) cast in together 
+--and order the result set alphabetically.						
+
+
+--Solution 
+SELECT 
+  f.title
+FROM film f
+  JOIN film_actor fa on fa.film_id = f.film_id
+WHERE fa.actor_id IN (105,122)
+GROUP BY f.film_id
+  HAVING COUNT(*) = 2
+ORDER BY f.title ASC
+ 
+--Solution with window functions practice
+WITH cte AS(			
+	SELECT 
+    f.title AS title
+    ,fa.actor_id
+    ,CASE
+      WHEN fa.actor_id = 105 OR fa.actor_id = 122 THEN 1		
+	    ELSE 0 
+     END AS both_in_film		
+	FROM film_actor fa		
+	  INNER JOIN FILM f USING(film_id)		
+	ORDER BY f.title),		
+cte1 AS(			
+	SELECT 
+  title
+  ,SUM(both_in_film) AS yes_both 
+  FROM CTE		
+	GROUP BY title		
+	ORDER BY yes_both DESC)		
+SELECT title FROM cte1			
+    WHERE yes_both = 2			
+ ORDER BY title			;
+ 
