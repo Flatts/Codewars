@@ -1,0 +1,32 @@
+Link: https://www.codewars.com/kata/5a8f00745084d718940000c5/train/sql
+
+Customer often need to now how much really they pay for the products. 
+Manufactureres make different sizes of same product so it is hard to compare prices, 
+sometimes they make packages look big, but the weight of the product is small.							
+							
+Products table schema:		Results table schema:	
+id (int)		              name (string)	
+name (string)		          weight (float)	
+price (float)		          price (float)	
+stock (int)		            price_per_kg (float)	
+weight (float)			
+producer (string)			
+country (string)			
+
+Solution
+SELECT 
+  name
+  ,weight
+  ,price
+  ,CAST(ROUND(CAST(price/(weight/1000) AS NUMERIC),2) AS DOUBLE PRECISION) AS price_per_kg
+FROM products
+ORDER BY price_per_kg,name;
+
+Voted Solution - 
+select 
+  name
+  ,weight
+  ,price
+  ,round((price * 1000 / weight)::numeric, 2)::float as "price_per_kg"
+from products
+order by price_per_kg, name;
