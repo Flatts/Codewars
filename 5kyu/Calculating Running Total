@@ -1,0 +1,33 @@
+Link: https://www.codewars.com/kata/589cf45835f99b2909000115/train/sql
+
+Given a posts table that contains a created_at timestamp column write a query that returns date (without time component), 
+a number of posts for a given date and a running (cumulative) total number of posts up until a given date. 
+he resulting set should be ordered chronologically by date.										
+				
+        
+Solution - 
+ SELECT
+  CREATED_AT::DATE AS DATE
+  ,COUNT(CREATED_AT) AS COUNT
+  ,SUM(COUNT(CREATED_AT)) OVER (ORDER BY CREATED_AT::DATE ROWS UNBOUNDED PRECEDING)::INT AS TOTAL
+FROM POSTS
+GROUP BY CREATED_AT::DATE
+
+Solution - Window Function Practice
+WITH cte AS(
+      SELECT 
+        DATE(created_at) AS date,COUNT(*)::INT AS count 
+      FROM posts
+      GROUP BY date ORDER BY date)
+    ,cte1 AS (
+        SELECT 
+          date
+          ,count
+          ,(SUM(count) OVER (ORDER BY date ASC rows between unbounded preceding and current row)) AS total 
+        FROM cte)
+
+SELECT 
+  date
+  ,count
+  ,total
+FROM cte1
