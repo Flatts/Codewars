@@ -1,0 +1,38 @@
+--Link: https://www.codewars.com/kata/589e0837e10c4a1018000028/train/sql
+
+--Given a posts table that contains a created_at timestamp column write a query that returns a first date of the month, 
+--a number of posts created in a given month and a month-over-month growth rate.
+--The resulting set should be ordered chronologically by date. Percent growth rate can be negative
+--percent growth rate should be rounded to one digit after the decimal point and immediately followed by a percent symbol "%". 
+--See the desired output below for the reference.
+
+--Solution - Using window functions
+WITH cte AS(
+      SELECT 
+        date_trunc('month',created_at)::DATE AS date
+        ,COUNT(*)::FLOAT AS count 
+      FROM posts
+      GROUP BY date ORDER BY date
+     )
+     ,cte1 AS(
+        SELECT 
+          date
+          ,count
+          ,(LAG(count,1) OVER (ORDER BY date))::FLOAT AS prev_month
+        FROM CTE
+        ORDER BY date
+      )
+
+SELECT 
+    date::DATE,count::INT
+    ,to_char(((count-prev_month)/prev_month)*100,'FM990.0%') AS percent_growth
+FROM cte1;
+
+--Solution in one go:
+select 
+  date_trunc('month', created_at)::date as date
+  ,count(*) as count
+  ,round(((100.0 / (lag(count(*)) over (order by date_trunc('month', created_at)::date asc))) * count(*)) -100, 1) || '%' as percent_growth
+from posts
+group by date
+order by date asc;
