@@ -1,0 +1,27 @@
+Link: https://www.codewars.com/kata/58113c03009b4fcc66000d29/train/sql
+
+For this challenge you need to create a SELECT statement, this SELECT statement will use an IN 
+to check whether a department has had a sale with a price over 98.00 dollars.
+
+departments table schema			sales table schema			resultant table schema	
+id			                      id			                 id	
+name			                    department_id (fkey)		 name	
+			                        name				
+                          		price				
+                              card_name				
+                              card_number				
+                              transaction_date		
+                              
+                              
+ 
+Solution - using subquery to search for id's in list
+SELECT 
+  id
+  ,name 
+ FROM departments
+  WHERE id IN (
+      SELECT 
+        department_id
+       FROM sales 
+       WHERE price > 98)
+       
