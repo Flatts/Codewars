@@ -1,0 +1,34 @@
+--Link:  https://www.codewars.com/kata/5982020284a83baf2f00001c/train/sql
+
+--You need to build a pivot table WITHOUT using CROSSTAB function. 
+--Having two tables products and details you need to select a pivot table of products with counts of details occurrences (possible details values are ['good', 'ok', 'bad'].
+--Results should be ordered by product's name.
+
+--Return Table
+--name
+--good
+--ok
+--bad
+
+--Solution
+SELECT 
+  p.name AS name
+  ,SUM(
+      CASE d.detail 
+          WHEN 'good' THEN 1 
+          ELSE 0
+      END) AS good
+  ,SUM(
+      CASE d.detail
+          WHEN 'ok' THEN 1 
+          ELSE 0
+      END) AS ok
+  ,SUM(
+      CASE d.detail 
+         WHEN 'bad' THEN 1 
+         ELSE 0
+      END) AS bad
+FROM products p
+  INNER JOIN details d ON p.id = d.product_id
+GROUP BY p.name
+ORDER BY p.name
