@@ -1,0 +1,58 @@
+--Link: https://www.codewars.com/kata/5816a3ecf54413a113000074/train/sql
+
+--Given a payment table, which is a part of DVD Rental Sample Database, with the following schema
+--produce a result set for the report that shows a side-by-side comparison of the number and total amounts of payments made in Mike's and Jon's stores broken down by months.
+--The resulting data set should be ordered by month using natural order (Jan, Feb, Mar, etc.).
+--Note: You don't need to worry about the year component. Months are never repeated because the sample data set contains payment information only for one year.
+
+
+--Column	       Type	                          Modifiers
+--payment_id	   INTEGER	                      NOT NULL
+--customer_id    SMALL INT	                    NOT NULL
+--staff_id	     SMALL INT	                    NOT NULL
+--rental_id	     INTEGER	                      NOT NULL
+--amount	       numeric(5,2)	                  NOT NULL
+--payment_date	 Timestamp without time zone
+
+--Solution:
+SELECT 
+  EXTRACT(MONTH FROM p.payment_date) AS month
+  ,COUNT(*) AS total_count
+  ,SUM(p.amount) AS total_amount
+  ,SUM(
+    CASE	
+	    WHEN p.staff_id = 1 THEN 1
+	    ELSE 0
+    END) AS mike_count
+  ,SUM(
+    CASE	
+	    WHEN p.staff_id = 1 THEN p.amount
+	    ELSE 0
+    END) AS mike_amount
+  ,SUM(
+    CASE	
+	    WHEN p.staff_id = 2 THEN 1
+	    ELSE 0
+    END) AS jon_count
+  ,SUM(
+     CASE	
+      WHEN p.staff_id = 2 then p.amount	
+      ELSE 0	
+     END) AS jon_amount	
+FROM payment p	
+  INNER JOIN staff s USING(staff_id)	
+GROUP BY month	
+ORDER BY month;
+
+--Solution Using Filter:
+SELECT		
+  EXTRACT(MONTH FROM payment_date)        AS month,		
+  COUNT(*)                                AS total_count,		
+  SUM(amount)                             AS total_amount,		
+  COUNT(*)    FILTER (WHERE staff_id = 1) AS mike_count,		
+  SUM(amount) FILTER (WHERE staff_id = 1) AS mike_amount,		
+  COUNT(*)    FILTER (WHERE staff_id = 2) AS jon_count,		
+  SUM(amount) FILTER (WHERE staff_id = 2) AS jon_amount		
+FROM payment		
+GROUP BY month		
+ORDER BY month;		
