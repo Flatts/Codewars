@@ -1,0 +1,31 @@
+--Link:  https://www.codewars.com/kata/58167fa1f544130dcf000317/train/sql
+
+--For this challenge you need to create a simple SELECT statement. 
+--Your task is to calculate the MIN, MEDIAN and MAX scores of the students from the results table.
+
+--Resultant table: min, median, max
+
+--Solution:
+
+SELECT		
+    SUM(min)/2   AS min
+    ,SUM(score)/2 AS median
+    ,SUM(max)/2   AS max		
+FROM(		
+     SELECT		
+        SCORE
+        ,min
+        ,max
+        ,ROW_NUM
+        ,row_count		
+     FROM(		
+	      SELECT	
+	        score::FLOAT
+          ,(MIN(score) OVER ())::INT AS min
+          ,COUNT(*) OVER() AS row_count
+          ,ROW_NUMBER() OVER (ORDER BY SCORE) AS ROW_NUM
+          ,(MAX(score) OVER())::INT AS max	
+	      FROM result) x	
+	WHERE	
+	ROW_NUM IN ((row_count+2)/2,(row_count)/2)	
+	)y	
