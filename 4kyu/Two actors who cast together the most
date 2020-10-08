@@ -1,0 +1,65 @@
+--Link: https://www.codewars.com/kata/5818bde9559ff58bd90004a2/train/sql
+
+--Given the the schema presented below find two actors who cast together the most. 
+--List titles of only those movies they were casting together. 
+--Order the result set alphabetically by the movie title.
+
+
+
+--Solution: 
+--Find the top pair of actors by self join and actor id is not equal
+with top_pair as (
+  select 
+    a1.actor_id as id1
+    ,a2.actor_id as id2
+  from 
+    film_actor a1
+  inner join film_actor a2 on a1.film_id=a2.film_id
+    where a1.actor_id <> a2.actor_id
+    group by a1.actor_id, a2.actor_id
+    order by count(a1.film_id) desc
+  limit 1
+  )
+-- Format name, and find titles, inner join at end to save time on query
+select
+  (select first_name || ' ' || last_name from actor where actor_id = tp.id1) as first_actor
+  ,(select first_name || ' ' || last_name from actor where actor_id = tp.id2) as second_actor
+  ,f.title as title
+from 
+  top_pair tp
+inner join film_actor fa1 on tp.id1 = fa1.actor_id
+inner join film_actor fa2 on tp.id2 = fa2.actor_id
+inner join film f on fa1.film_id=f.film_id and fa2.film_id=f.film_id
+
+-- Working Solution
+--Create unique combination of actor id's, gather all relevant information(slower processing time, easier to visualize data_
+WITH actor_film_table AS(					
+	SELECT fa1.actor_id AS first_actor_id,				
+		a.first_name||' '||a.last_name AS first_actor,			
+		fa2.actor_id AS second_actor_id,			
+		aa.first_name||' '||aa.last_name AS second_actor,			
+		fa1.film_id,			
+		f.title AS title,			
+		fa1.actor_id||';'||fa2.actor_id AS actor_pairings,			
+		CASE WHEN fa1.film_id>0 THEN 1 ELSE 0 END AS film_count			
+		FROM film_actor AS fa1			
+INNER JOIN film_actor AS fa2 ON					
+fa1.actor_id != fa2.actor_id					
+AND fa1.film_id = fa2.film_id					
+INNER JOIN actor a ON fa1.actor_id = a.actor_id					
+INNER JOIN actor aa ON fa2.actor_id = aa.actor_id					
+INNER JOIN film f ON fa1.film_id = f.film_id),					
+
+-Selecting the actors that work together the most					
+cte1 AS (SELECT actor_pairings AS most_together,SUM(film_count) from actor_film_table					
+GROUP BY actor_pairings					
+ORDER BY SUM(film_count) DESC					
+LIMIT 1),					
+					
+cte2 AS (SELECT  split_part(most_together,';',1)::int AS first_actor_testid,					
+		split_part(most_together,';',2)::int AS second_actor_testid			
+FROM cte1)					
+-- Final Table					
+SELECT first_actor,second_actor,title FROM actor_film_table					
+WHERE first_actor_id IN(SELECT first_actor_testid FROM cte2) AND					
+second_actor_id IN (SELECT second_actor_testid FROM cte2)					
