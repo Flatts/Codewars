@@ -1,0 +1,41 @@
+--Link:  https://www.codewars.com/kata/594323fde53209e94700012a/train/sql
+
+--The objective of this Kata is to show that you are proficient at string manipulation 
+--  (and perhaps that you can use extensively subqueries).
+
+--You will use people table but will focus solely on the name column
+
+--name
+--Greyson Tate Lebsack Jr.
+--Elmore Clementina O'Conner
+you will be provided with a full name and you have to return the name in columns as follows.
+
+--name	      first_lastname	    second_lastname
+--Greyson     Tate	Lebsack	      Jr.
+--Elmore	    Clementina	        O'Conner
+
+--Note: Don't forget to remove spaces around names in your result. 
+--Note: Due to multicultural context, if full name has more than 3 words, consider first 2 as name
+
+--Solution: 
+--Step 3: 
+    -- If the name array has 3 items - Select 1 to (3-2) or 1 for first name
+    -- If the name array has 4 characters Select 1 to (4-2) or 2 for first name
+    -- First Last name will always be in position array length - 1
+    -- Second last name will alway be in position of array length
+    -- When using a subquery in Postgre there needs to be a variable after the sub q
+SELECT
+    array_to_string(name[1:len-2],' ') AS name
+    ,name[len-1] AS first_lastname
+    ,name[len] AS second_lastname
+FROM(
+----Step 2 - Pair the array version of name with the length of the array
+  SELECT
+    name
+    ,array_length(name,1) AS len
+  FROM (
+--------Step 1: Convert string to Array for manipulation
+      SELECT 
+        string_to_array(name,' ') AS name
+      FROM
+        people) arr) arr_len
