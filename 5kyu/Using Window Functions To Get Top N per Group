@@ -1,0 +1,45 @@
+--Link: https://www.codewars.com/kata/582001237a3a630ce8000a41/train/sql
+
+--Given the schema presented below write a query, which uses a window function,
+--  that returns two most viewed posts for every category.
+
+--Order the result set by:
+--category name alphabetically
+--number of post views largest to lowest
+--post id lowest to largest
+--Note: Some categories may have less than two or no posts at all.
+--    Two or more posts within the category can be tied by (have the same) the number of views. 
+--    Use post id as a tie breaker - a post with a lower id gets a higher rank.
+
+--Categories Table: id, category
+--Posts Table: id, category_id, title, views
+--Return Table: category_id, category, title, views, post_id
+
+--Solution:
+
+WITH post_rank AS (
+  SELECT
+    RANK() OVER (PARTITION BY c.id ORDER BY views DESC,p.id)
+    ,c.id AS cat_id
+    ,c.category AS category
+    ,title
+    ,views
+    ,p.id AS post_id
+  FROM 
+    categories c
+LEFT JOIN posts p ON p.category_id =  c.id )
+
+SELECT 
+  cat_id AS category_id
+  ,category
+  ,title
+  ,views
+  ,post_id
+FROM
+  post_rank
+WHERE rank < 3
+ORDER BY 
+  category
+  ,views DESC
+  ,post_id
+;
