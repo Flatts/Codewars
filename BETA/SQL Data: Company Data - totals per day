@@ -1,0 +1,17 @@
+--Link: https://www.codewars.com/kata/58164d628906323d4300026e/train/sql
+
+--Your task is simple, given the data you must calculate on each day how many hours have been clocked up for each department.
+
+--Resultant table: day (date) [order by], department_name (name of department) [order by], total_hours (total hours for the day)
+
+--Solution
+
+SELECT
+  login::DATE AS day
+  ,name AS department_name
+  ,EXTRACT (HOUR FROM SUM(logout-login)) AS total_hours
+FROM timesheet t
+INNER JOIN department d ON t.department_id = d.id
+GROUP BY day,department_name
+ORDER BY day,department_name
+;
